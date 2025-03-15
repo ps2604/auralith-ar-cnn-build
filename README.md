@@ -1,41 +1,36 @@
-# Auralith AR Ecosystem (Iteration 1: CNN-Based)
+# Auralith AR Pipeline — CNN-Based (Iteration 1)
 **Author: Pirassena Sabaratnam**
 
 ## Overview
-This repository contains the first full-scale iteration of the Auralith Augmented Reality (AR) ecosystem, developed in early 2025 specifically for the **NAIMME app**. This iteration utilizes a standard Convolutional Neural Network (CNN) architecture (MobileNetV2/EfficientNet backbones) to achieve **Real-Time AR Clothing Try-On**.
+This repository contains the first iteration of the Auralith AR ecosystem, built for the NAIMME live-shopping app. It implements a **real-time AR clothing try-on pipeline** using standard CNN backbones (MobileNetV2/EfficientNet).
 
-While modular and adaptable to various use cases, the primary implementation focuses on the seamless integration of garment encoding and live subject perception.
+## Architecture
+The pipeline consists of three modules:
 
-## System Anatomy (AR Try-On Pipeline)
-The ecosystem is divided into three core specialized modules that work in concert:
+### 1. FLUXA — Multi-Task Perception
+Trained on COCO2017 for human subject analysis. Outputs four task heads simultaneously:
+- **Semantic Segmentation**: Subject/background masking
+- **Keypoint Detection**: 17 skeletal joint positions for pose tracking
+- **Surface Normals**: Per-pixel 3D surface orientation for garment draping
+- **Environment Lighting**: 9-channel spherical harmonic lighting estimation
 
-### 1. FLUXA (Perception Engine)
-**Role: Subject Identification**
-Trained on COCO2017 for human subject analysis, FLUXA performs real-time perception of the user:
-- **Semantic Segmentation**: Isolating the subject from the background.
-- **Keypoint Detection**: Tracking skeletal joints to align virtual garments.
-- **Surface Normals**: Estimating the user's 3D geometry for realistic garment draping.
-- **Environment Lighting**: Inferring global illumination to relight virtual clothing.
+### 2. LITHOS — Garment Encoder
+Encodes target garment images into a latent representation, preserving visual detail independent of the target environment.
 
-### 2. LITHOS (Scene & Garment Encoding)
-**Role: Garment Representation**
-Trained on specialized clothing datasets, LITHOS encodes the target garment into a consistent latent representation, ensuring the visual details are preserved regardless of the final environment.
+### 3. PRISM — Synthesis & Rendering
+Merges FLUXA's perception outputs with LITHOS's garment encoding to render virtual clothing onto the subject:
+- Pose-driven garment deformation
+- Shadow synthesis from estimated geometry
+- Dynamic relighting using FLUXA's environment lighting
 
-### 3. PRISM (Augmentation Engine)
-**Role: Final Synthesis**
-The decoding and synthesis layer that merges the perception data from FLUXA with the garment encoding from LITHOS to place the virtual clothing onto the subject in real-time.
-- **Deformation**: Morphing the virtual garment to match the subject's pose.
-- **Shadow Synthesis**: Generating physically-aligned shadows for realistic depth.
-- **Lighting Application**: Dynamically relighting the garment using FLUXA's environment data.
-
-## Technical Implementation
+## Technical Details
 - **Framework**: TensorFlow 2.x / Keras
-- **Deployment**: Optimized for **Google Cloud Vertex AI** with GCS-integrated data pipelines.
-- **Mobile Support**: Fully compatible with **TFLite** for on-device AR execution.
-- **Optimization**: Features custom callbacks for GCS checkpointing, automated metric tracking, and early overfitting detection.
+- **Backbones**: MobileNetV2 / EfficientNet (configurable)
+- **Deployment**: Google Cloud Vertex AI training, TFLite export for on-device inference
+- **Dataset**: COCO2017 (human subjects)
 
 ## License
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+Apache License 2.0 — see [LICENSE](LICENSE).
 
 ---
-*Developed in 2025 as part of the Auralith Inc. Research.*
+*Developed March 2025 — Auralith Inc.*
